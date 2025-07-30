@@ -4,6 +4,8 @@ from a2s import byteio
 import io
 from a2s.exceptions import BufferExhaustedError
 import asyncio
+import requests
+import re
 
 ESCAPE_SEQUENCES = [(b"\x01\x02", b"\x00"), (b"\x01\x03", b"\xFF"), (b"\x01\x01", b"\x01")]
 
@@ -44,6 +46,18 @@ class ArmaRules:
         self.mods = []
         self.signatures_count = 0
         self.signatures = []
+
+def fetch_steam_mod_name(workshop_id):
+    url = f"https://steamcommunity.com/sharedfiles/filedetails/?id={workshop_id}"
+    try:
+        res = requests.get(url, timeout=5)
+        if res.status_code == 200:
+            m = re.search(r'<div class="workshopItemTitle">(.*?)</div>', res.text)
+            if m:
+                return m.group(1).strip()
+    except Exception:
+        pass
+    return None
 
 def _parse_rules_data(rules) -> ArmaRules:
     total = list(rules.keys())[0][1]
@@ -106,17 +120,29 @@ def _parse_rules_data(rules) -> ArmaRules:
         name_bytes = message.read(name_len)
         name = name_bytes.decode("utf-8", errors="replace")
 
-        # REPLACE workshop_id if it's 0
+        # Replace workshop_id if it's 0 with cleaned mod name
         if workshop_id == 0:
             workshop_id = f"{name.replace(' ', '')}"
 
         arma_rules.mods.append(ArmaMod(mod_hash, workshop_id, name))
+
+    # Fix mod names from Steam Workshop if missing or empty
+    for mod in arma_rules.mods:
+        if isinstance(mod.workshop_id, int) and mod.workshop_id != 0 and (mod.name == '' or mod.name is None):
+            fetched_name = fetch_steam_mod_name(mod.workshop_id)
+            if fetched_name:
+                mod.name = fetched_name
+            else:
+                mod.name = f"@{mod.workshop_id}"
+        elif mod.workshop_id == 0:
+            mod.name = f"@{mod.name.replace(' ', '')}"
 
     arma_rules.signatures_count = message.read_uint8()
     for _ in range(arma_rules.signatures_count):
         sig_len = message.read_uint8()
         sig_hash = int.from_bytes(message.read(sig_len), byteorder="little")
         arma_rules.signatures.append(sig_hash)
+
     arma_rules.mods.sort(key=lambda m: m.name.lower())
     return arma_rules
 
