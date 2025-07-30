@@ -26,8 +26,8 @@ All functions return an ArmaRules instance. Some documentation is included in th
 
 ## Authors
 
-Built by @jishnukarri  
-Worked on with @Benkol003
+Built by [@jishnukarri](https://github.com/jishnukarri)  
+Worked on with [@Benkol003](https://github.com/Benkol003)
 
 ## License
 
