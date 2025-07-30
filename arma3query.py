@@ -8,7 +8,7 @@ import requests
 import re
 
 ESCAPE_SEQUENCES = [(b"\x01\x02", b"\x00"), (b"\x01\x03", b"\xFF"), (b"\x01\x01", b"\x01")]
-
+ 
 class DlcFlags(Enum):
     kart = 0x1
     Marksmen = 0x2
