@@ -8,7 +8,7 @@ Python >= 3.10, [python-a2s](https://github.com/Yepoleb/python-a2s)
 
 ## Install
 
-`pip3 install .`
+`pip3 install arma3query`
 
 ## API
 
