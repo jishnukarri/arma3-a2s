@@ -8,20 +8,20 @@ import requests
 import re
 
 ESCAPE_SEQUENCES = [(b"\x01\x02", b"\x00"), (b"\x01\x03", b"\xFF"), (b"\x01\x01", b"\x01")]
- 
+
 class DlcFlags(Enum):
     kart = 0x1
-    Marksmen = 0x2
-    Heli = 0x4
-    Curator = 0x8
-    Expansion = 0x10
-    Jets = 0x20
-    Orange = 0x40
-    Argo = 0x80
-    TacOps = 0x100
-    Tanks = 0x200
-    Contact = 0x400
-    Enoch = 0x800
+    marksmen = 0x2
+    heli = 0x4
+    curator = 0x8
+    expansion = 0x10
+    jets = 0x20
+    orange = 0x40
+    argo = 0x80
+    tacops = 0x100
+    tanks = 0x200
+    contact = 0x400
+    enoch = 0x800
 
 class ArmaMod:
     def __init__(self, hash_val, workshop_id, name):
@@ -46,6 +46,7 @@ class ArmaRules:
         self.mods = []
         self.signatures_count = 0
         self.signatures = []
+        self.cdlc = []
 
 def fetch_steam_mod_name(workshop_id):
     url = f"https://steamcommunity.com/sharedfiles/filedetails/?id={workshop_id}"
@@ -96,7 +97,6 @@ def _parse_rules_data(rules) -> ArmaRules:
         "weapon_crosshair": bool(flags & 0x04),
     }
 
-    # Extract AI & Difficulty level (3 bits each)
     arma_rules.ai_level = (flags >> 3) & 0b111
     arma_rules.difficulty_level = (flags >> 6) & 0b111
 
@@ -120,13 +120,11 @@ def _parse_rules_data(rules) -> ArmaRules:
         name_bytes = message.read(name_len)
         name = name_bytes.decode("utf-8", errors="replace")
 
-        # Replace workshop_id if it's 0 with cleaned mod name
         if workshop_id == 0:
             workshop_id = f"{name.replace(' ', '')}"
 
         arma_rules.mods.append(ArmaMod(mod_hash, workshop_id, name))
 
-    # Fix mod names from Steam Workshop if missing or empty
     for mod in arma_rules.mods:
         if isinstance(mod.workshop_id, int) and mod.workshop_id != 0 and (mod.name == '' or mod.name is None):
             fetched_name = fetch_steam_mod_name(mod.workshop_id)
@@ -144,6 +142,32 @@ def _parse_rules_data(rules) -> ArmaRules:
         arma_rules.signatures.append(sig_hash)
 
     arma_rules.mods.sort(key=lambda m: m.name.lower())
+
+    # Your added CDLCS logic
+    cdlc_steam_ids = {1042220, 1227700, 1294440, 1681170, 1175380, 2647760, 2647830}
+
+    cdlc_names_list = [
+        "global mobilization",
+        "s.o.g. prairie fire",
+        "csla iron curtain",
+        "western sahara",
+        "spearhead 1944",
+        "reaction forces",
+        "expeditionary forces"
+    ]
+
+    # Convert dlcs enum list to lowercase names
+    arma_rules.dlcs = [d.name.lower() for d in arma_rules.dlcs]
+
+    new_mods = []
+    for mod in arma_rules.mods:
+        if isinstance(mod.workshop_id, int) and mod.workshop_id in cdlc_steam_ids:
+            # Add to cdlc list with lowercase mod name
+            arma_rules.cdlc.append(mod.name.lower())
+        else:
+            new_mods.append(mod)
+    arma_rules.mods = new_mods
+
     return arma_rules
 
 def arma3rules(addr) -> ArmaRules:
