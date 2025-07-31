@@ -14,7 +14,7 @@ setuptools.setup(
     url="https://github.com/jishnukarri/arma3-a2s",
     py_modules=["arma3query"],
     install_requires=["python-a2s"],
-    license="MIT License",
+    license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
