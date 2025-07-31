@@ -4,3 +4,4 @@ test.py
 build
 dist
 arma3query.egg-info
+*.bat
