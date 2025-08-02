@@ -146,16 +146,6 @@ def _parse_rules_data(rules) -> ArmaRules:
     # Your added CDLCS logic
     cdlc_steam_ids = {1042220, 1227700, 1294440, 1681170, 1175380, 2647760, 2647830}
 
-    cdlc_names_list = [
-        "global mobilization",
-        "s.o.g. prairie fire",
-        "csla iron curtain",
-        "western sahara",
-        "spearhead 1944",
-        "reaction forces",
-        "expeditionary forces"
-    ]
-
     # Convert dlcs enum list to lowercase names
     arma_rules.dlcs = [d.name.lower() for d in arma_rules.dlcs]
 
@@ -163,7 +153,7 @@ def _parse_rules_data(rules) -> ArmaRules:
     for mod in arma_rules.mods:
         if isinstance(mod.workshop_id, int) and mod.workshop_id in cdlc_steam_ids:
             # Add to cdlc list with lowercase mod name
-            arma_rules.cdlc.append(mod.name.lower())
+            arma_rules.cdlc.append(mod.workshop_id())
         else:
             new_mods.append(mod)
     arma_rules.mods = new_mods
