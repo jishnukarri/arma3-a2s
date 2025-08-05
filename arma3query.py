@@ -152,8 +152,8 @@ def _parse_rules_data(rules) -> ArmaRules:
     new_mods = []
     for mod in arma_rules.mods:
         if isinstance(mod.workshop_id, int) and mod.workshop_id in cdlc_steam_ids:
-            # Add to cdlc list with lowercase mod name
-            arma_rules.cdlc.append(mod.workshop_id())
+            # Add to cdlc list with Steam Workshop ID (FIXED: removed () call)
+            arma_rules.cdlc.append(mod.workshop_id)
         else:
             new_mods.append(mod)
     arma_rules.mods = new_mods

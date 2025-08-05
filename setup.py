@@ -5,7 +5,7 @@ with open("README.md", "r") as readme:
 
 setuptools.setup(
     name="arma3query",
-    version="1.2",
+    version="1.3",
     author="Jishnu Karri",
     author_email="me@jishnukarri.me",
     description="Small module to decode the Arma 3 rules binary response.",
