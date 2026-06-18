@@ -70,7 +70,9 @@ def _parse_rules_data(rules) -> ArmaRules:
     combined = bytearray()
     for i in sorted(chunks):
         combined.extend(chunks[i])
-
+    
+    # replace escape sequences after combining chunks, otherwise will fail
+    # to replace secape sequences that are across two chunks.
     for s, r in ESCAPE_SEQUENCES:
         v = v.replace(s, r)
 
