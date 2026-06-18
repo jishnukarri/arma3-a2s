@@ -65,13 +65,14 @@ def _parse_rules_data(rules) -> ArmaRules:
     chunks = {}
 
     for (k, v) in rules.items():
-        for s, r in ESCAPE_SEQUENCES:
-            v = v.replace(s, r)
         chunks[list(k)[0]] = v
 
     combined = bytearray()
     for i in sorted(chunks):
         combined.extend(chunks[i])
+
+    for s, r in ESCAPE_SEQUENCES:
+        v = v.replace(s, r)
 
     stream = io.BytesIO(combined)
     message = byteio.ByteReader(stream, endian="<")
